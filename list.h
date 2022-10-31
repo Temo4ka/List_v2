@@ -22,21 +22,17 @@ enum ListErrors {
      ListGraphVizExecutionErr = 1 << 13,
 };
 
-enum Status {
-     Active = 0,
-    InActive = 1
-};
+struct ListElem {
+    ListElem *next = nullptr;
+    ListElem *prev = nullptr;
 
-enum Life {
-    Bitter = 0,  
-    Sweet  = 1
+     Elem_t   data = POISON ;
 };
 
 struct List {
-    List  *next   = nullptr;
-    List  *prev   = nullptr;
+    ListElem list = {};
 
-    Elem_t data   = POISON ;
+     size_t  size =  0;
 };
 
 #define catchNullptr(POINTER) {                                                                                    \
@@ -46,18 +42,20 @@ struct List {
     }                                                                                                                  \
 }
 
-int listElemCtor(List *list, Elem_t val = POISON);
+int listCtor(List *head);
 
-List *listLogicInsert(List *listHead, size_t ind, Elem_t val);
+int listElemCtor(ListElem *elem, ListElem *prev, ListElem *next, Elem_t val = POISON); 
 
-List *listPushBack(List *listHead, Elem_t val);
+ListElem *listLogicInsert(List *head, size_t ind, Elem_t val);
 
-List *listPushFront(List *listHead, Elem_t val);
+ListElem *listPushBack(List *head, Elem_t val);
 
-int listLogicErase (List *listHead, size_t ind);
+ListElem *listPushFront(List *head, Elem_t val);
 
-List *listGetPos(List *listHead, size_t index);
+int listLogicErase (List *head, size_t ind);
 
-int listPrint(List *listHead, FILE* stream = stdout);
+ListElem *listGetPos(ListElem *listHead, size_t index);
 
-int listDtor(List *list);
+int listPrint(ListElem *listHead, FILE* stream = stdout);
+
+int listElemDtor(ListElem *list);

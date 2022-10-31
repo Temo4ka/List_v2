@@ -7,8 +7,8 @@ int main (int argc, const char* argv[]) {
     int pos = 0;
     int val = 0;
 
-    List listHead = {};
-    listElemCtor(&listHead, POISON);
+    List head = {};
+    listCtor(&head);
 
     // listDump(&list);
 
@@ -19,19 +19,14 @@ int main (int argc, const char* argv[]) {
         fscanf(f, "%d %d", &cmd, &pos);
         if (cmd) {
             fscanf(f, "%d", &val);
-            listLogicInsert(&listHead, pos, val);
+            listLogicInsert(&head, pos, val);
         } else {
-            listLogicErase(&listHead, pos);
+            listLogicErase(&head, pos);
         }
         //fprintf(stderr, "--- %d ---\n", list.prev[list.head]);
         // fprintf(logStream, "Command number %zu\n", i);
-        listPrint(&listHead);
+        listPrint(&(head.list));
     }
-
-
-    fprintf(stderr, "\nEverything is Ok, Dude, RELAX!\n");
-
-    listDtor(&listHead);
 
     if (f != stdin) fclose (f);
 

@@ -16,18 +16,28 @@ static FILE *LogGraph = fopen("logs/HtmlLog.html", "w");
 static FILE *LogFile  = LogGraph;
 
 
-int listElemCtor(List *list, Elem_t val) {
-    catchNullptr(list);
+int listCtor(List *head) {
+    catchNullptr(head);
 
-    list -> prev = list;
-    list -> next = list;
+    (head -> list).next = &(head -> list);
+    (head -> list).prev = &(head -> list);
 
-    list -> data = val;
+    head -> size = 0;
 
     return ListIsOk;
 }
 
-int listDtor(List *list) {
+int listElemCtor(ListElem *elem, ListElem *prev, ListElem *next, Elem_t val) {
+    catchNullptr(elem);
+
+    elem -> next = next;
+    elem -> prev = prev;
+    elem -> data = val ;
+
+    return ListIsOk;
+}
+
+int listElemDtor(ListElem *list) {
     catchNullptr(list);
     
     free(list);
@@ -36,66 +46,63 @@ int listDtor(List *list) {
 
 }
 
-List *listLogicInsert(List *listHead, size_t ind, Elem_t val) {
-    if (listHead == nullptr) return nullptr;
+ListElem *listLogicInsert(List *head, size_t ind, Elem_t val) {
+    if (head == nullptr) return nullptr;
 
-    List *prevPos = listGetPos(listHead, ind);
+    ListElem *prevPos = listGetPos(&(head -> list), ind);
     if (prevPos == nullptr) return nullptr;
     
-    List *newPos = (List *) calloc(1, sizeof(List)); 
-    if (listElemCtor(newPos, val)) return nullptr; 
-    
-    newPos -> next = prevPos -> next;
-    newPos -> prev =     prevPos    ;
+    ListElem *newPos = (ListElem *) calloc(1, sizeof(ListElem));  
+    if (listElemCtor(newPos, prevPos, prevPos -> next, val)) return nullptr;
 
     (prevPos -> next) -> prev = newPos;
           prevPos -> next     = newPos;
 
+    head -> size++;
+
     return newPos;
 }
 
-List *listPushBack(List *listHead, Elem_t val) {
-    if (listHead == nullptr) return nullptr;
+ListElem *listPushBack(List *head, Elem_t val) {
+    if (head == nullptr) return nullptr;
 
-    List *prevPos = listHead -> prev;
+    ListElem *prevPos = (head -> list).prev;
     if (prevPos == nullptr) return nullptr;
     
-    List *newPos = (List *) calloc(1, sizeof(List)); 
-    if (listElemCtor(newPos, val)) return nullptr; 
-    
-    newPos -> next = prevPos -> next;
-    newPos -> prev =     prevPos    ;
+    ListElem *newPos = (ListElem *) calloc(1, sizeof(ListElem));  
+    if (listElemCtor(newPos, prevPos, prevPos -> next, val)) return nullptr;
 
     (prevPos -> next) -> prev = newPos;
           prevPos -> next     = newPos;
 
+    head -> size++;
+
     return newPos;
 }
 
-List *listPushFront(List *listHead, Elem_t val) {
-    if (listHead == nullptr) return nullptr;
+ListElem *listPushFront(List *head, Elem_t val) {
+    if (head == nullptr) return nullptr;
 
-    List *prevPos = listHead;
+    ListElem *prevPos = &(head -> list);
     if (prevPos == nullptr) return nullptr;
     
-    List *newPos = (List *) calloc(1, sizeof(List)); 
-    if (listElemCtor(newPos, val)) return nullptr; 
-    
-    newPos -> next = prevPos -> next;
-    newPos -> prev =     prevPos    ;
+    ListElem *newPos = (ListElem *) calloc(1, sizeof(ListElem));  
+    if (listElemCtor(newPos, prevPos, prevPos -> next, val)) return nullptr;
 
     (prevPos -> next) -> prev = newPos;
           prevPos -> next     = newPos;
 
+    head -> size++;
+
     return newPos;
 }
 
-int listLogicErase (List *listHead, size_t ind) {
-    catchNullptr(listHead);
+int listLogicErase (List *head, size_t ind) {
+    catchNullptr(head);
 
-    if (listHead -> next == listHead) return ListIsEmpty;
+    if (!head -> size) return ListIsEmpty;
 
-    List *curPos = listGetPos(listHead, ind);
+    ListElem *curPos = listGetPos(&(head -> list), ind);
     if (curPos == nullptr) return ListWrongIndex;
     
     (curPos -> prev) -> next = curPos -> next;
@@ -103,14 +110,16 @@ int listLogicErase (List *listHead, size_t ind) {
 
     free(curPos);
 
+    head -> size--;
+
     return ListIsOk;
 }
 
 
-List *listGetPos(List *listHead, size_t index) {
+ListElem *listGetPos(ListElem *listHead, size_t index) {
     if (listHead == nullptr) return nullptr;
 
-    List *curElem = listHead;
+    ListElem *curElem = listHead;
     for (size_t pos = 0; pos < index; ++pos) {
         curElem = curElem -> next;
         if (curElem == listHead)
@@ -120,11 +129,11 @@ List *listGetPos(List *listHead, size_t index) {
     return curElem;
 }
 
-int listPrint(List *listHead, FILE* stream) {
+int listPrint(ListElem *listHead, FILE* stream) {
     catchNullptr(listHead);
 
     fprintf(stream, "FictElem");
-    for (List *curElem = listHead -> next; curElem != listHead; curElem = curElem -> next) {
+    for (ListElem *curElem = listHead -> next; curElem != listHead; curElem = curElem -> next) {
         fprintf(stream, " -> %d", curElem -> data);
     }
     fprintf(stream, "\n");
